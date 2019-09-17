@@ -1,0 +1,114 @@
+---** Install Oracle Java **---
+
+sudo yum install wget
+
+wget https://download.oracle.com/otn/java/jdk/8u221-b11/230deb18db3e4014bb8e3e8324f81b43/jdk-8u221-linux-x64.rpm?AuthParam=1568560031_f8d010ab471f1f1ccf717b979c126fd6
+
+mv jdk-8u221-linux-x64.rpm\?AuthParam\=1568378395_067b840084328eb91e1054c399c89f3d jdk-8u221-linux-x64.rpm
+
+sudo yum localinstall jdk-8u221-linux-x64.rpm
+
+java -version
+
+
+
+---** Install Cloudera Director **---
+
+cd /etc/yum.repos.d/
+
+sudo wget "https://archive.cloudera.com/director/redhat/7/x86_64/director/cloudera-director.repo"
+
+sudo yum install cloudera-director-server cloudera-director-client
+
+sudo service cloudera-director-server start
+
+
+---** Disable and stop firewall **---
+
+sudo systemctl disable firewalld
+
+sudo systemctl stop firewalld
+
+
+---** Create Role and Policy for Cloudera Director **---
+
+-->> Create a policy 
+
+IAM Policy 
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "directorEc2",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateTags",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeImages",
+                "ec2:DescribeInstanceStatus",
+                "ec2:DescribeInstances",
+                "ec2:DescribeKeyPairs",
+                "ec2:DescribePlacementGroups",
+                "ec2:DescribeRegions",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeNetworkAcls",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:RunInstances",
+                "ec2:TerminateInstances",
+                "ec2:GetConsoleOutput",
+                "ec2:CreateVolume",
+                "ec2:DescribeVolumes",
+                "ec2:AttachVolume",
+                "ec2:DeleteVolume",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:ImportKeyPair",
+                "ec2:RequestSpotInstances",
+                "ec2:CancelSpotInstanceRequests",
+                "ec2:DescribeSpotInstanceRequests"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "directorKms",
+            "Effect": "Allow",
+            "Action": [
+                "kms:DescribeKey",
+                "kms:CreateGrant",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "directorIam",
+            "Effect": "Allow",
+            "Action": [
+                "iam:GetInstanceProfile",
+                "iam:PassRole"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "directorRds",
+            "Effect": "Allow",
+            "Action": [
+                "rds:CreateDBInstance",
+                "rds:DeleteDBInstance",
+                "rds:DescribeDBInstances",
+                "rds:DescribeDBEngineVersions",
+                "rds:DescribeDBSubnetGroups"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+
+
+-->>> Create role and use above policy
+
+-->>> Attach role to Cloudera Director
+
+
+-->> Connect to Cloudera Director on Port 7189
